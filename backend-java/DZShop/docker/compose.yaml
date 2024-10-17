@@ -1,0 +1,20 @@
+version: "3.3"
+
+services:
+  productservice-db:
+    image: postgres:latest
+    ports:
+      - "3310:5432"
+    environment:
+      POSTGRES_DB: 'productservice_db'
+      POSTGRES_USER: 'pxl'
+      POSTGRES_PASSWORD: 'pxl'
+
+  cartservice-db:
+    image: postgres:latest
+    ports:
+      - "3311:5432"
+    environment:
+      POSTGRES_DB: 'cartservice_db'
+      POSTGRES_USER: 'pxl'
+      POSTGRES_PASSWORD: 'pxl'

@@ -1,0 +1,19 @@
+server:
+  port: 8081
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:3310/productservice_db
+    username: pxl
+    password: pxl
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  application:
+    name: product-service
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8085/eureka/
