@@ -6,4 +6,8 @@ import java.util.List;
 
 public interface IProductService {
     List<Product> getAllProducts();
+
+    Long addProduct(Product prodToAdd);
+
+    Product updateProduct(Product prodToUpdate);
 }

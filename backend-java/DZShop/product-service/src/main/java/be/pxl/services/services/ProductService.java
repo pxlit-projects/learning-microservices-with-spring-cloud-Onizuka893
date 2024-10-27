@@ -17,4 +17,22 @@ public class ProductService implements IProductService {
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
+
+    @Override
+    public Long addProduct(Product prodToAdd) {
+        return productRepository.save(prodToAdd).getId();
+    }
+
+    @Override
+    public Product updateProduct(Product prodToUpdate) {
+        return productRepository.findById(prodToUpdate.getId())
+                .map(p -> {
+                    p.setName(prodToUpdate.getName());
+                    p.setDescription(prodToUpdate.getDescription());
+                    p.setPrice(prodToUpdate.getPrice());
+                    p.setStock(prodToUpdate.getStock());
+                    return productRepository.save(p);
+                })
+                .orElseGet(() -> productRepository.save(prodToUpdate));
+    }
 }
