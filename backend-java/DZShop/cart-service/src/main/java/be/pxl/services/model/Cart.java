@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -20,6 +21,13 @@ public class Cart {
     private Long id;
     private Long userId;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<CartItem> cartItems;
+    private List<CartItem> cartItems = new ArrayList<>();
 
+    public double GetTotal() {
+        return cartItems.stream().map(cartItem -> cartItem.GetTotal()).reduce(0.0, Double::sum);
+    }
+
+    public void AddCartItem(CartItem cartItem) {
+        cartItems.add(cartItem);
+    }
 }

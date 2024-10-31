@@ -28,4 +28,8 @@ public class CartItem {
         this.quantity = cartItemDTO.getQuantity();
         this.price = cartItemDTO.getPrice();
     }
+
+    public double GetTotal() {
+        return quantity * price;
+    }
 }
