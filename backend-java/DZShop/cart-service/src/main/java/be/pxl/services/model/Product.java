@@ -1,18 +1,18 @@
-package be.pxl.services.domain;
+package be.pxl.services.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryDTO {
+public class Product {
     private Long id;
     private String name;
-    private List<ProductDTO> products;
+    private String description;
+    private Double price;
+    private int stock;
 }

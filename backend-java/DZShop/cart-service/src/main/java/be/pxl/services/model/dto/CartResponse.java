@@ -12,9 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CartDTO {
+public class CartResponse {
     private Long id;
     private Long userId;
     private double total;
-    private List<CartItemDTO> items = new ArrayList<>();
+    private List<CartItemResponse> items = new ArrayList<>();
 }

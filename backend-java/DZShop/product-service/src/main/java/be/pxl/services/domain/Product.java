@@ -23,4 +23,14 @@ public class Product {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Category category;
+
+    public void removeFromStock() {
+        if (this.stock <= 0) throw new RuntimeException("Stock is empty");
+
+        this.stock--;
+    }
+
+    public void addToStock() {
+        this.stock++;
+    }
 }

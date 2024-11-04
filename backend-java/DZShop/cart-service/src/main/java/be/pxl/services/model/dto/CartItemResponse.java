@@ -10,12 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class CartItemDTO {
+public class CartItemResponse {
     private Long productId;
     private Integer quantity;
     private Double price;
 
-    public CartItemDTO(CartItem cartItem) {
+    public CartItemResponse(CartItem cartItem) {
         this.productId = cartItem.getProductId();
         this.quantity = cartItem.getQuantity();
         this.price = cartItem.getPrice();

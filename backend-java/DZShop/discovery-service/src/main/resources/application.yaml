@@ -4,13 +4,19 @@
 #eureka.client.register-with-eureka=false
 #eureka.client.fetch-registry=false
 #eureka.client.service-url.defaultZone=http://${eureka.instance.hostname}:${server.port}/eureka/
-server:
-  port: 8085
-eureka:
-  instance:
-    hostname: localhost
-  client:
-    register-with-eureka: false
-    fetch-registry: false
-    service-url:
-      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+#server:
+#  port: 8085
+#eureka:
+#  instance:
+#    hostname: localhost
+#  client:
+#    register-with-eureka: false
+#    fetch-registry: false
+#    service-url:
+#      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+
+spring:
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8088/}
+  application:
+    name: discovery-service

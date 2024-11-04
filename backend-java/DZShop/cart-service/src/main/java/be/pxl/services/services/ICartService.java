@@ -1,18 +1,17 @@
 package be.pxl.services.services;
 
 import be.pxl.services.model.Cart;
-import be.pxl.services.model.dto.CartItemDTO;
+import be.pxl.services.model.dto.CartItemResponse;
+import be.pxl.services.model.dto.CartResponse;
 
 
 public interface ICartService {
-    Cart getCart(Long id);
+    CartResponse getCart(Long id);
 
-    Cart addItem(CartItemDTO cartItemDTO, Long cartId);
+    CartResponse getCartByUserId(Long userId);
 
-    Cart getCartByUserId(Long userId);
+    CartResponse createCart(Long userId);
 
-    Cart createCart(Long userId);
-
-    Cart addToCart(Long userId, Long productId);
-    Cart removeFromCart(Long userId, Long productId);
+    CartResponse addToCart(Long userId, Long productId);
+    CartResponse removeFromCart(Long userId, Long productId);
 }

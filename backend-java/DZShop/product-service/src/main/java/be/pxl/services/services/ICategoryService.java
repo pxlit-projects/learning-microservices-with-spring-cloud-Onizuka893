@@ -1,17 +1,19 @@
 package be.pxl.services.services;
 
 import be.pxl.services.domain.Category;
+import be.pxl.services.domain.CategoryRequest;
+import be.pxl.services.domain.CategoryResponse;
 
 import java.util.List;
 
 public interface ICategoryService {
-    List<Category> getAllCategories();
+    List<CategoryResponse> getAllCategories();
 
-    Long addCategory(Category catToAdd);
+    CategoryResponse addCategory(CategoryRequest catToAdd);
 
-    Category updateCategory(Category catToUpdate);
+    CategoryResponse updateCategory(Long categoryId,CategoryRequest catToUpdate);
 
-    Category addProductToCategory(Long categoryId, Long productId);
+    CategoryResponse addProductToCategory(Long categoryId, Long productId);
 
-    Category removeProductFromCategory(Long categoryId, Long productId);
+    CategoryResponse removeProductFromCategory(Long categoryId, Long productId);
 }

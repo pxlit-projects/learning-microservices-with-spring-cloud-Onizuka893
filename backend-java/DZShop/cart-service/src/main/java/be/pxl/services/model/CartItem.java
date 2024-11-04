@@ -1,6 +1,6 @@
 package be.pxl.services.model;
 
-import be.pxl.services.model.dto.CartItemDTO;
+import be.pxl.services.model.dto.CartItemResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,12 +22,6 @@ public class CartItem {
     private Long productId;
     private int quantity;
     private double price;
-
-    public CartItem(CartItemDTO cartItemDTO) {
-        this.productId = cartItemDTO.getProductId();
-        this.quantity = cartItemDTO.getQuantity();
-        this.price = cartItemDTO.getPrice();
-    }
 
     public double GetTotal() {
         return quantity * price;
