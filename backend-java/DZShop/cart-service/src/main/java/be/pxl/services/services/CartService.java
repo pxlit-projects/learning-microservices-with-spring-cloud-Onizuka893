@@ -10,6 +10,8 @@ import be.pxl.services.repository.CartItemRepository;
 import be.pxl.services.repository.CartRepository;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CartService implements ICartService {
+    private static final Logger log = LoggerFactory.getLogger(CartService.class);
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductClient productClient;
@@ -46,6 +49,7 @@ public class CartService implements ICartService {
 
     @Override
     public CartResponse getCart(Long id) {
+        log.info("Getting cart with id [{}]", id);
         Cart cart =  cartRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("cart with id [" + id + "] not found "));
         return mapToCartResponse(cart);
@@ -53,6 +57,7 @@ public class CartService implements ICartService {
 
     @Override
     public CartResponse getCartByUserId(Long userId) {
+        log.info("Getting cart with userId [{}]", userId);
         Cart cart = getCartByUserIdHelper(userId);
 
         return mapToCartResponse(cart);
@@ -60,6 +65,7 @@ public class CartService implements ICartService {
 
     @Override
     public CartResponse createCart(Long userId) {
+        log.info("Creating cart for userId [{}]", userId);
         Cart cart = new Cart();
         cart.setUserId(userId);
         return mapToCartResponse(cartRepository.save(cart));
@@ -67,6 +73,7 @@ public class CartService implements ICartService {
 
     @Override
     public CartResponse addToCart(Long userId, Long productId) {
+        log.info("Adding product to cart belonging to userId [{}] with product id [{}]", userId, productId);
         Cart cart = getCartByUserIdHelper(userId);
         Product productFromProductService = productClient.addProductToCart(productId);
 
@@ -97,6 +104,7 @@ public class CartService implements ICartService {
 
     @Override
     public CartResponse removeFromCart(Long userId, Long productId) {
+        log.info("Removing product from cart belonging to userId [{}] with product id [{}]", userId, productId);
         Cart cart = getCartByUserIdHelper(userId);
         productClient.removeProductFromCart(productId);
 

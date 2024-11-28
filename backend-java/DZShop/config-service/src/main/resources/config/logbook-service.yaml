@@ -1,0 +1,22 @@
+server:
+  port: 8086
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin
+  datasource:
+    url: jdbc:postgresql://localhost:3312/logbookservice_db
+    username: pxl
+    password: pxl
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8085/eureka/

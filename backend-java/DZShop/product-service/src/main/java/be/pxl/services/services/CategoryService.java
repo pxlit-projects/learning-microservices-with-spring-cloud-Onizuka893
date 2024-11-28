@@ -6,6 +6,8 @@ import be.pxl.services.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CategoryService implements ICategoryService {
+    private static final Logger log = LoggerFactory.getLogger(CategoryService.class);
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
 
@@ -37,11 +40,13 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public List<CategoryResponse> getAllCategories() {
+        log.info("Get all categories");
         return categoryRepository.findAll().stream().map(this::mapToCategoryResponse).toList();
     }
 
     @Override
     public CategoryResponse addCategory(CategoryRequest categoryRequest) {
+        log.info("Add category with request {}", categoryRequest);
         Category category = Category.builder()
                 .name(categoryRequest.getName())
                 .products(new ArrayList<>())
@@ -51,6 +56,7 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public CategoryResponse updateCategory(Long categoryId, CategoryRequest catToUpdate) {
+        log.info("Update category with id {} and request {}", categoryId, catToUpdate);
         return mapToCategoryResponse( categoryRepository.findById(categoryId)
                 .map(c -> {
                     c.setName(catToUpdate.getName());
@@ -65,6 +71,7 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public CategoryResponse addProductToCategory(Long categoryId, Long productId) {
+        log.info("Add product to a category with id {} and request {}", categoryId, productId);
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException("Category not found"));
 
@@ -80,6 +87,7 @@ public class CategoryService implements ICategoryService {
 
     @Override
     public CategoryResponse removeProductFromCategory(Long categoryId, Long productId) {
+        log.info("Remove product from a category with id {} and request {}", categoryId, productId);
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException("Category not found"));
 

@@ -18,3 +18,29 @@ services:
       POSTGRES_DB: 'cartservice_db'
       POSTGRES_USER: 'pxl'
       POSTGRES_PASSWORD: 'pxl'
+
+  logbookservice-db:
+    image: postgres:latest
+    ports:
+      - "3312:5432"
+    environment:
+      POSTGRES_DB: 'logbookservice_db'
+      POSTGRES_USER: 'pxl'
+      POSTGRES_PASSWORD: 'pxl'
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # RabbitMQ main port for applications
+      - "15672:15672" # Management UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: admin # Default username
+      RABBITMQ_DEFAULT_PASS: admin # Default password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq # Persist RabbitMQ data
+      - rabbitmq_logs:/var/log/rabbitmq # Persist RabbitMQ logs
+
+volumes:
+  rabbitmq_data:
+  rabbitmq_logs:

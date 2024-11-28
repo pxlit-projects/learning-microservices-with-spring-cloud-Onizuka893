@@ -6,6 +6,8 @@ import be.pxl.services.domain.ProductResponse;
 import be.pxl.services.repository.ProductRepository;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,7 +15,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ProductService implements IProductService {
-   private final ProductRepository productRepository;
+    private static final Logger log = LoggerFactory.getLogger(ProductService.class);
+    private final ProductRepository productRepository;
 
     private ProductResponse mapToProductResponse(Product product) {
         return ProductResponse.builder()
@@ -27,11 +30,13 @@ public class ProductService implements IProductService {
 
     @Override
     public List<ProductResponse> getAllProducts() {
+        log.info("Get all products");
         return productRepository.findAll().stream().map(this::mapToProductResponse).toList();
     }
 
     @Override
     public ProductResponse addProduct(ProductRequest productRequest) {
+        log.info("Add product with request: {}", productRequest);
         Product product = Product.builder()
                 .name(productRequest.getName())
                 .description(productRequest.getDescription())
@@ -43,6 +48,7 @@ public class ProductService implements IProductService {
 
     @Override
     public ProductResponse updateProduct(Long productId,ProductRequest productRequest) {
+        log.info("Update product with id: {} and request {}", productId, productRequest);
         return mapToProductResponse( productRepository.findById(productId)
                 .map(p -> {
                     p.setName(productRequest.getName());
@@ -56,6 +62,7 @@ public class ProductService implements IProductService {
 
     @Override
     public ProductResponse addProductToCart(Long productId) {
+        log.info("Add product to cart with id: {}", productId);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product with id " + productId + " not found"));
 
@@ -65,6 +72,7 @@ public class ProductService implements IProductService {
 
     @Override
     public ProductResponse removeProductFromCart(Long productId) {
+        log.info("Remove product from cart with id: {}", productId);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product with id " + productId + " not found"));
 
