@@ -18,6 +18,8 @@ public class Product {
     private Long id;
     private String name;
     private String description;
+    @Enumerated(EnumType.STRING)  // Store the enum as a string in the database
+    private EnergyRating energyRating;
     private Double price;
     private int stock;
 

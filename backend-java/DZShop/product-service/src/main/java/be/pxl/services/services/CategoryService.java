@@ -18,7 +18,9 @@ import java.util.List;
 public class CategoryService implements ICategoryService {
     private static final Logger log = LoggerFactory.getLogger(CategoryService.class);
     private final CategoryRepository categoryRepository;
+    private final HeaderValidationService headerValidationService;
     private final ProductRepository productRepository;
+    private final RabbitMQProducer rabbitMQProducer;
 
     private CategoryResponse mapToCategoryResponse(Category category) {
         return CategoryResponse.builder()
@@ -34,6 +36,7 @@ public class CategoryService implements ICategoryService {
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
+                .energyRating(product.getEnergyRating().toString())
                 .stock(product.getStock())
                 .build();
     }
@@ -47,6 +50,7 @@ public class CategoryService implements ICategoryService {
     @Override
     public CategoryResponse addCategory(CategoryRequest categoryRequest) {
         log.info("Add category with request {}", categoryRequest);
+        rabbitMQProducer.sendMessage("Add category with request [" + categoryRequest + "]" + " invoked by user: " + headerValidationService.user);
         Category category = Category.builder()
                 .name(categoryRequest.getName())
                 .products(new ArrayList<>())
@@ -57,6 +61,7 @@ public class CategoryService implements ICategoryService {
     @Override
     public CategoryResponse updateCategory(Long categoryId, CategoryRequest catToUpdate) {
         log.info("Update category with id {} and request {}", categoryId, catToUpdate);
+        rabbitMQProducer.sendMessage("Update category with id [" + categoryId + "] with request [" + catToUpdate + "]" + " invoked by user: " + headerValidationService.user);
         return mapToCategoryResponse( categoryRepository.findById(categoryId)
                 .map(c -> {
                     c.setName(catToUpdate.getName());
@@ -72,6 +77,7 @@ public class CategoryService implements ICategoryService {
     @Override
     public CategoryResponse addProductToCategory(Long categoryId, Long productId) {
         log.info("Add product to a category with id {} and request {}", categoryId, productId);
+        rabbitMQProducer.sendMessage("Add product to category with id [" + categoryId + "] with request [" + productId + "]" + " invoked by user: " + headerValidationService.user);
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException("Category not found"));
 
@@ -88,6 +94,7 @@ public class CategoryService implements ICategoryService {
     @Override
     public CategoryResponse removeProductFromCategory(Long categoryId, Long productId) {
         log.info("Remove product from a category with id {} and request {}", categoryId, productId);
+        rabbitMQProducer.sendMessage("Remove product from category with id [" + categoryId + "] with request [" + productId + "]" + " invoked by user: " + headerValidationService.user);
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException("Category not found"));
 

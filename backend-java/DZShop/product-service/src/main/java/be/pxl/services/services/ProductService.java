@@ -1,5 +1,6 @@
 package be.pxl.services.services;
 
+import be.pxl.services.domain.EnergyRating;
 import be.pxl.services.domain.Product;
 import be.pxl.services.domain.ProductRequest;
 import be.pxl.services.domain.ProductResponse;
@@ -11,12 +12,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductService implements IProductService {
     private static final Logger log = LoggerFactory.getLogger(ProductService.class);
     private final ProductRepository productRepository;
+    private final HeaderValidationService headerValidationService;
+    private final RabbitMQProducer rabbitMQProducer;
 
     private ProductResponse mapToProductResponse(Product product) {
         return ProductResponse.builder()
@@ -24,6 +28,7 @@ public class ProductService implements IProductService {
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
+                .energyRating(product.getEnergyRating().toString())
                 .stock(product.getStock())
                 .build();
     }
@@ -34,13 +39,35 @@ public class ProductService implements IProductService {
         return productRepository.findAll().stream().map(this::mapToProductResponse).toList();
     }
 
+    public List<ProductResponse> searchProducts(String searchTerm, String category, Double minPrice, Double maxPrice, String rating) {
+        log.info("Searching products with searchTerm: {}, category: {}, minPrice: {}, maxPrice: {}, rating: {}",
+                searchTerm, category, minPrice, maxPrice, rating);
+
+        if (rating != null && !rating.isEmpty()) {
+            EnergyRating energyRating = EnergyRating.valueOf(rating);
+            return productRepository.search(searchTerm, category, minPrice, maxPrice, energyRating)
+                    .stream()
+                    .map(this::mapToProductResponse)
+                    .collect(Collectors.toList());
+        } else {
+            return productRepository.search(searchTerm, category, minPrice, maxPrice, null)
+                    .stream()
+                    .map(this::mapToProductResponse)
+                    .collect(Collectors.toList());
+        }
+
+        // Call to repository to search for products based on filters
+    }
+
     @Override
     public ProductResponse addProduct(ProductRequest productRequest) {
         log.info("Add product with request: {}", productRequest);
+        rabbitMQProducer.sendMessage("Add product with request [" + productRequest + "]" + " invoked by user: " + headerValidationService.user);
         Product product = Product.builder()
                 .name(productRequest.getName())
                 .description(productRequest.getDescription())
                 .price(productRequest.getPrice())
+                .energyRating(EnergyRating.valueOf(productRequest.getEnergyRating()))
                 .stock(productRequest.getStock())
                 .build();
         return mapToProductResponse(productRepository.save(product));
@@ -49,11 +76,13 @@ public class ProductService implements IProductService {
     @Override
     public ProductResponse updateProduct(Long productId,ProductRequest productRequest) {
         log.info("Update product with id: {} and request {}", productId, productRequest);
+        rabbitMQProducer.sendMessage("Update product with id [" + productId + "] with request [" + productRequest + "]" + " invoked by user: " + headerValidationService.user);
         return mapToProductResponse( productRepository.findById(productId)
                 .map(p -> {
                     p.setName(productRequest.getName());
                     p.setDescription(productRequest.getDescription());
                     p.setPrice(productRequest.getPrice());
+                    p.setEnergyRating(EnergyRating.valueOf(productRequest.getEnergyRating()));
                     p.setStock(productRequest.getStock());
                     return productRepository.save(p);
                 })
@@ -63,6 +92,7 @@ public class ProductService implements IProductService {
     @Override
     public ProductResponse addProductToCart(Long productId) {
         log.info("Add product to cart with id: {}", productId);
+        rabbitMQProducer.sendMessage("Add product with id [" + productId + "] to cart");
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product with id " + productId + " not found"));
 
@@ -73,6 +103,7 @@ public class ProductService implements IProductService {
     @Override
     public ProductResponse removeProductFromCart(Long productId) {
         log.info("Remove product from cart with id: {}", productId);
+        rabbitMQProducer.sendMessage("Remove product with id [" + productId + "] from cart");
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product with id " + productId + " not found"));
 

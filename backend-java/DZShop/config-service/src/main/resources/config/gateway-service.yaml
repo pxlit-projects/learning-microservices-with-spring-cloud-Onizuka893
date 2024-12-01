@@ -20,12 +20,6 @@ spring:
             - Path=/cart/**
           filters:
             - RewritePath=/cart/(?<path>.*), /$\{path}
-        - id: messaging-service
-          uri: lb://messaging-service
-          predicates:
-            - Path=/message/**
-          filters:
-            - RewritePath=/message/(?<path>.*), /$\{path}
         - id: logbook-service
           uri: lb://logbook-service
           predicates:

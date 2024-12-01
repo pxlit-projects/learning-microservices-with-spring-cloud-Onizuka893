@@ -1,7 +1,7 @@
 package be.pxl.services.services;
 
 import be.pxl.services.domain.Entry;
-import be.pxl.services.domain.EntryRequest;
+import be.pxl.services.domain.LogbookEntryRequest;
 import be.pxl.services.domain.EntryResponse;
 import be.pxl.services.repository.EntryRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,11 +34,11 @@ public class EntryService implements IEntryService {
     }
 
     @Override
-    public EntryResponse addEntry(EntryRequest entryRequest) {
-        log.info("Add entry: {}", entryRequest);
+    public EntryResponse addEntry(LogbookEntryRequest logbookEntryRequest) {
+        log.info("Add entry: {}", logbookEntryRequest);
         Entry entry = Entry.builder()
-                .message(entryRequest.getMessage())
-                .producer(entryRequest.getProducer())
+                .message(logbookEntryRequest.getMessage())
+                .producer(logbookEntryRequest.getProducer())
                 .created(new Date())
                 .build();
         return mapToEntryResponse(entryRepository.save(entry));

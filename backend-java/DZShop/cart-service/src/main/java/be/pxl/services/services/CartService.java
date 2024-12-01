@@ -20,9 +20,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CartService implements ICartService {
     private static final Logger log = LoggerFactory.getLogger(CartService.class);
+    private final RabbitMQProducer rabbitMQProducer;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final ProductClient productClient;
+    private final HeaderValidationService headerValidationService;
 
     private CartItemResponse mapToCartItemResponse(CartItem cartItem) {
         return CartItemResponse.builder()
@@ -58,6 +60,7 @@ public class CartService implements ICartService {
     @Override
     public CartResponse getCartByUserId(Long userId) {
         log.info("Getting cart with userId [{}]", userId);
+        rabbitMQProducer.sendMessage("getting cart for userId [" + userId + "]" + " invoked by user: " + headerValidationService.user);
         Cart cart = getCartByUserIdHelper(userId);
 
         return mapToCartResponse(cart);
@@ -65,7 +68,9 @@ public class CartService implements ICartService {
 
     @Override
     public CartResponse createCart(Long userId) {
+        //check if cart already exist with userID
         log.info("Creating cart for userId [{}]", userId);
+        rabbitMQProducer.sendMessage("Creating cart for userId " + userId + " invoked by user: " + headerValidationService.user);
         Cart cart = new Cart();
         cart.setUserId(userId);
         return mapToCartResponse(cartRepository.save(cart));
@@ -74,6 +79,7 @@ public class CartService implements ICartService {
     @Override
     public CartResponse addToCart(Long userId, Long productId) {
         log.info("Adding product to cart belonging to userId [{}] with product id [{}]", userId, productId);
+        rabbitMQProducer.sendMessage("Adding product to cart belonging to userId " + userId + " with product id " +  productId + " invoked by user: " + headerValidationService.user);
         Cart cart = getCartByUserIdHelper(userId);
         Product productFromProductService = productClient.addProductToCart(productId);
 
@@ -105,6 +111,7 @@ public class CartService implements ICartService {
     @Override
     public CartResponse removeFromCart(Long userId, Long productId) {
         log.info("Removing product from cart belonging to userId [{}] with product id [{}]", userId, productId);
+        rabbitMQProducer.sendMessage("Removing product from cart belonging to userId " + userId + " with product id " +  productId + " invoked by user: " + headerValidationService.user);
         Cart cart = getCartByUserIdHelper(userId);
         productClient.removeProductFromCart(productId);
 

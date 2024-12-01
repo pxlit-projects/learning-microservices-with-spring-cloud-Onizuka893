@@ -9,6 +9,8 @@ import java.util.List;
 public interface IProductService {
     List<ProductResponse> getAllProducts();
 
+    List<ProductResponse> searchProducts(String searchTerm, String category, Double minPrice, Double maxPrice, String rating);
+
     ProductResponse addProduct(ProductRequest productRequest);
 
     ProductResponse updateProduct(Long productId, ProductRequest productRequest);

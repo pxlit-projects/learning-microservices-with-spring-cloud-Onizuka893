@@ -1,6 +1,6 @@
 package be.pxl.services.controller;
 
-import be.pxl.services.domain.EntryRequest;
+import be.pxl.services.domain.LogbookEntryRequest;
 import be.pxl.services.services.EntryService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -25,8 +25,8 @@ public class EntryController {
     }
 
     @PostMapping
-    public ResponseEntity createEntry(@RequestBody EntryRequest entryRequest) {
-        log.info("Create entry endpoint called with body {}", entryRequest);
-        return new ResponseEntity(entryService.addEntry(entryRequest), HttpStatus.CREATED);
+    public ResponseEntity createEntry(@RequestBody LogbookEntryRequest logbookEntryRequest) {
+        log.info("Create entry endpoint called with body {}", logbookEntryRequest);
+        return new ResponseEntity(entryService.addEntry(logbookEntryRequest), HttpStatus.CREATED);
     }
 }
