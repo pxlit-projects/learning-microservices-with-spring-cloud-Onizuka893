@@ -3,7 +3,6 @@ package be.pxl.services.controller;
 import be.pxl.services.domain.*;
 import be.pxl.services.services.CategoryService;
 import be.pxl.services.services.HeaderValidationService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Base64;
 
 @RestController
 @RequestMapping("/category")

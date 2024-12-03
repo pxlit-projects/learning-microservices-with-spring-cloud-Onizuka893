@@ -1,10 +1,10 @@
 package be.pxl.services.services;
 
 import be.pxl.services.domain.*;
+import be.pxl.services.exceptions.NotFoundException;
 import be.pxl.services.repository.CategoryRepository;
 import be.pxl.services.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

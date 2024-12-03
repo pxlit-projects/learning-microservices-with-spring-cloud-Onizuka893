@@ -1,6 +1,7 @@
 package be.pxl.services.services;
 
 import be.pxl.services.client.ProductClient;
+import be.pxl.services.exceptions.NotFoundException;
 import be.pxl.services.model.Cart;
 import be.pxl.services.model.CartItem;
 import be.pxl.services.model.Product;
@@ -8,7 +9,6 @@ import be.pxl.services.model.dto.CartItemResponse;
 import be.pxl.services.model.dto.CartResponse;
 import be.pxl.services.repository.CartItemRepository;
 import be.pxl.services.repository.CartRepository;
-import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

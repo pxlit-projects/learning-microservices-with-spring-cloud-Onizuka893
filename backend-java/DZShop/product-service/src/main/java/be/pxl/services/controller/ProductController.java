@@ -59,13 +59,13 @@ public class ProductController {
     }
 
     @GetMapping("/{id}/add")
-    public ResponseEntity addProduct(@RequestHeader(value = "Authorization", required = false) String authorizationHeader ,@PathVariable Long id) {
+    public ResponseEntity addProduct(@PathVariable Long id) {
         log.info("Add product endpoint called with productId {}", id);
         return new ResponseEntity(productService.addProductToCart(id), HttpStatus.OK);
     }
 
     @GetMapping("/{id}/remove")
-    public ResponseEntity removeProduct(@RequestHeader(value = "Authorization", required = false) String authorizationHeader ,@PathVariable Long id) {
+    public ResponseEntity removeProduct(@PathVariable Long id) {
         log.info("Remove product endpoint called with productId {}", id);
         return new ResponseEntity(productService.removeProductFromCart(id), HttpStatus.OK);
     }
