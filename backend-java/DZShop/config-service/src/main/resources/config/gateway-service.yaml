@@ -4,6 +4,18 @@ server:
 spring:
   cloud:
     gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: [ "*" ] # Allow all localhost ports
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: [ "*" ]
+            allowCredentials: false
       discovery:
         locator:
           enabled: true
@@ -25,6 +37,7 @@ spring:
           predicates:
             - Path=/logbook/**
           filters:
+            - AddResponseHeader=Access-Control-Allow-Origin, *
             - RewritePath=/logbook/(?<path>.*), /$\{path}
 
 eureka:

@@ -90,6 +90,13 @@ public class ProductService implements IProductService {
     }
 
     @Override
+    public void deleteProduct(Long productId) {
+        log.info("Delete product with id: {}", productId);
+        rabbitMQProducer.sendMessage("Delete product with id [" + productId + "]" + " invoked by user: " + headerValidationService.user);
+        productRepository.deleteById(productId);
+    }
+
+    @Override
     public ProductResponse addProductToCart(Long productId) {
         log.info("Add product to cart with id: {}", productId);
         rabbitMQProducer.sendMessage("Add product with id [" + productId + "] to cart");

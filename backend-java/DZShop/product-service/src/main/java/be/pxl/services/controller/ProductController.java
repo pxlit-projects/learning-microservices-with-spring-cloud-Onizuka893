@@ -58,6 +58,18 @@ public class ProductController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteProduct(@RequestHeader(value = "Authorization", required = false) String authorizationHeader ,@PathVariable Long id) {
+        boolean isAdmin = headerValidationService.hasAdminRole(authorizationHeader);
+        if (isAdmin) {
+            log.info("Delete product endpoint called with productId {}", id);
+            productService.deleteProduct(id);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
+        }
+    }
+
     @GetMapping("/{id}/add")
     public ResponseEntity addProduct(@PathVariable Long id) {
         log.info("Add product endpoint called with productId {}", id);
