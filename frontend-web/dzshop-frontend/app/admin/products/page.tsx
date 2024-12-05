@@ -22,6 +22,7 @@ import { ProductForm } from "@/components/product-form";
 import { useProductContext } from "@/lib/productContext";
 import { Product } from "@/lib/product";
 import { toString } from "@/lib/energy-rating";
+import { ProductCategoryForm } from "@/components/product-category-form";
 
 export default function ProductsPage() {
   const { products, createProduct, updateProduct, deleteProduct } =
@@ -99,6 +100,24 @@ export default function ProductsPage() {
                         product={editingProduct}
                         onSubmit={handleUpdateProduct}
                       />
+                    </DialogContent>
+                  </Dialog>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => setEditingProduct(product)}
+                      >
+                        Category
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Manage Categories</DialogTitle>
+                      </DialogHeader>
+                      <ProductCategoryForm product={editingProduct} />
                     </DialogContent>
                   </Dialog>
                   <Button

@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import axios from "axios";
 import { Category } from "./category";
+import { useToast } from "@/hooks/use-toast";
 
 const username = "admin";
 const password = "admin";
@@ -27,6 +28,16 @@ interface CategoryContextType {
     updatedCategory: Partial<Category>
   ) => Promise<void>;
   deleteCategory: (id: number) => Promise<void>;
+  deleteProductFromCategory: (
+    categoryId: number,
+    productId: number
+  ) => Promise<void>;
+  addProductToCategory: (
+    categoryId: number,
+    productId: number
+  ) => Promise<void>;
+  error: string | null; // Error message
+  clearError: () => void; // Clear the error
 }
 
 // Default Context
@@ -43,9 +54,28 @@ interface CategoryProviderProps {
 export const CategoryProvider: React.FC<CategoryProviderProps> = ({
   children,
 }) => {
+  const { toast } = useToast();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [error, setError] = useState<string | null>(null); // State for error messages
 
   const API_URL = "http://localhost:8083/product/category"; // Adjust to your API base URL
+
+  // Helper to handle errors and set the error state
+  const handleError = (error: unknown, message: string) => {
+    if (axios.isAxiosError(error)) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.response?.data || "An error occurred.",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: message,
+      });
+    }
+  };
 
   // Fetch all products
   const getCategories = async () => {
@@ -53,7 +83,7 @@ export const CategoryProvider: React.FC<CategoryProviderProps> = ({
       const response = await axios.get<Category[]>(API_URL);
       setCategories(response.data);
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      handleError(error, "Error fetching categories");
     }
   };
 
@@ -67,7 +97,7 @@ export const CategoryProvider: React.FC<CategoryProviderProps> = ({
       });
       setCategories((prev) => [...prev, response.data]);
     } catch (error) {
-      console.error("Error creating category:", error);
+      handleError(error, "Error creating category");
     }
   };
 
@@ -86,7 +116,7 @@ export const CategoryProvider: React.FC<CategoryProviderProps> = ({
         prev.map((product) => (product.id === id ? response.data : product))
       );
     } catch (error) {
-      console.error("Error updating category:", error);
+      handleError(error, "Error updating category");
     }
   };
 
@@ -98,7 +128,64 @@ export const CategoryProvider: React.FC<CategoryProviderProps> = ({
       });
       setCategories((prev) => prev.filter((product) => product.id !== id));
     } catch (error) {
-      console.error("Error deleting category:", error);
+      handleError(error, "Error deleting category");
+    }
+  };
+
+  // Add a product to a category
+  const addProductToCategory = async (
+    categoryId: number,
+    productId: number
+  ) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/${categoryId}/products/${productId}`,
+        {},
+        {
+          headers: { Authorization: basicAuth },
+        }
+      );
+      setCategories((prev) =>
+        prev.map((category) =>
+          category.id === categoryId ? response.data : category
+        )
+      );
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        // Check if the error response is a conflict (HTTP status 409)
+        if (error.response?.status === 409) {
+          const errorMessage =
+            error.response?.data || "Conflict error occurred.";
+          handleError(error, errorMessage); // Use the error message from the response
+        } else {
+          // For other types of errors, use a generic error message
+          handleError(error, "Error adding product to category");
+        }
+      } else {
+        handleError(error, "Error adding product to category");
+      }
+    }
+  };
+
+  // Remove a product from a category
+  const deleteProductFromCategory = async (
+    categoryId: number,
+    productId: number
+  ) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL}/${categoryId}/products/${productId}`,
+        {
+          headers: { Authorization: basicAuth },
+        }
+      );
+      setCategories((prev) =>
+        prev.map((category) =>
+          category.id === categoryId ? response.data : category
+        )
+      );
+    } catch (error) {
+      handleError(error, "Error removing product from category");
     }
   };
 
@@ -106,6 +193,11 @@ export const CategoryProvider: React.FC<CategoryProviderProps> = ({
   useEffect(() => {
     getCategories();
   }, []);
+
+  // Clear error
+  const clearError = () => {
+    setError(null);
+  };
 
   return (
     <CategoryContext.Provider
@@ -115,6 +207,10 @@ export const CategoryProvider: React.FC<CategoryProviderProps> = ({
         createCategory: createCategory,
         updateCategory: updateCategory,
         deleteCategory: deleteCategory,
+        addProductToCategory: addProductToCategory,
+        deleteProductFromCategory: deleteProductFromCategory,
+        error: error,
+        clearError: clearError,
       }}
     >
       {children}

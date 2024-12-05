@@ -5,6 +5,7 @@ import be.pxl.services.domain.Product;
 import be.pxl.services.domain.ProductRequest;
 import be.pxl.services.domain.ProductResponse;
 import be.pxl.services.exceptions.NotFoundException;
+import be.pxl.services.repository.CategoryRepository;
 import be.pxl.services.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 public class ProductService implements IProductService {
     private static final Logger log = LoggerFactory.getLogger(ProductService.class);
     private final ProductRepository productRepository;
+    private final CategoryService categoryService;
     private final HeaderValidationService headerValidationService;
     private final RabbitMQProducer rabbitMQProducer;
 
@@ -93,6 +95,15 @@ public class ProductService implements IProductService {
     public void deleteProduct(Long productId) {
         log.info("Delete product with id: {}", productId);
         rabbitMQProducer.sendMessage("Delete product with id [" + productId + "]" + " invoked by user: " + headerValidationService.user);
+
+        // Fetch the product by ID
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product not found with id: " + productId));
+
+        if(product.getCategory() != null) {
+            categoryService.removeProductFromCategory(product.getCategory().getId(), productId);
+        }
+
         productRepository.deleteById(productId);
     }
 

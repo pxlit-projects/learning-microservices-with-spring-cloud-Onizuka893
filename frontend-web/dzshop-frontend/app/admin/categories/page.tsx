@@ -20,32 +20,23 @@ import {
 } from "@/components/ui/dialog";
 import { CategoryForm } from "@/components/category-form";
 import { useCategoryContext } from "@/lib/categoryContext";
-
-// Mock data for categories
-const initialCategories = [
-  { id: 1, name: "Category 1", description: "Description 1" },
-  { id: 2, name: "Category 2", description: "Description 2" },
-  { id: 3, name: "Category 3", description: "Description 3" },
-];
+import { Category } from "@/lib/category";
+import { CategoryProductsForm } from "@/components/category-products-form";
 
 export default function CategoriesPage() {
-  const { categories, createCategory, updateCategory, deleteCategory } =
-    useCategoryContext();
-  const [editingCategory, setEditingCategory] = useState(null);
+  const {
+    categories,
+    createCategory,
+    updateCategory,
+    deleteCategory,
+    deleteProductFromCategory,
+  } = useCategoryContext();
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
-  const handleAddCategory = (newCategory) => {
-    setCategories([...categories, { ...newCategory, id: Date.now() }]);
-  };
+  const handleUpdateCategory = (updatedCategory: Partial<Category>) => {
+    updateCategory(editingCategory!.id, updatedCategory);
 
-  const handleUpdateCategory = (updatedCategory) => {
-    setCategories(
-      categories.map((c) => (c.id === updatedCategory.id ? updatedCategory : c))
-    );
     setEditingCategory(null);
-  };
-
-  const handleDeleteCategory = (id) => {
-    setCategories(categories.filter((c) => c.id !== id));
   };
 
   return (
@@ -62,7 +53,7 @@ export default function CategoriesPage() {
             <DialogHeader>
               <DialogTitle>Add New Category</DialogTitle>
             </DialogHeader>
-            <CategoryForm onSubmit={handleAddCategory} />
+            <CategoryForm category={null} onSubmit={createCategory} />
           </DialogContent>
         </Dialog>
       </div>
@@ -103,11 +94,32 @@ export default function CategoriesPage() {
                       />
                     </DialogContent>
                   </Dialog>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => setEditingCategory(category)}
+                      >
+                        Manage
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Manage Category</DialogTitle>
+                      </DialogHeader>
+                      <CategoryProductsForm
+                        onClick={deleteProductFromCategory}
+                        category={editingCategory}
+                      />
+                    </DialogContent>
+                  </Dialog>
                   <Button
                     variant="destructive"
                     size="sm"
                     className="ml-2"
-                    onClick={() => handleDeleteCategory(category.id)}
+                    onClick={() => deleteCategory(category.id)}
                   >
                     Delete
                   </Button>

@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import axios from "axios";
 import { Product } from "./product";
+import { fromString } from "./energy-rating";
 
 const username = "admin";
 const password = "admin";
@@ -25,6 +26,13 @@ interface ProductContextType {
     updatedProduct: Partial<Product>
   ) => Promise<void>;
   deleteProduct: (id: number) => Promise<void>;
+  searchProducts: (
+    searchTerm: string | undefined,
+    category: string | undefined,
+    minPrice: string | undefined,
+    maxPrice: string | undefined,
+    energyRating: string | undefined
+  ) => Promise<void>;
 }
 
 // Default Context
@@ -47,6 +55,39 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({
   const getProducts = async () => {
     try {
       const response = await axios.get<Product[]>(API_URL + "/");
+      setProducts(response.data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    }
+  };
+
+  const searchProducts = async (
+    searchTerm: string | undefined,
+    category: string | undefined,
+    minPrice: string | undefined,
+    maxPrice: string | undefined,
+    energyRating: string | undefined
+  ) => {
+    try {
+      // Create a URLSearchParams object to build the query string
+      const params = new URLSearchParams();
+
+      // Add query parameters only if they are not undefined
+      if (searchTerm) params.append("searchTerm", searchTerm);
+      if (category && category !== "all") params.append("category", category);
+      if (minPrice !== "0" && minPrice !== undefined)
+        params.append("minPrice", minPrice.toString());
+      if (maxPrice !== "0" && maxPrice !== undefined)
+        params.append("maxPrice", maxPrice.toString());
+      if (energyRating != "all")
+        params.append("rating", fromString(energyRating!));
+
+      // Make the GET request with dynamic parameters
+      const response = await axios.get<Product[]>(`${API_URL}/search`, {
+        params: params,
+      });
+
+      // Update state with the fetched products
       setProducts(response.data);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -105,6 +146,7 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({
     <ProductContext.Provider
       value={{
         products,
+        searchProducts,
         getProducts,
         createProduct,
         updateProduct,

@@ -75,20 +75,74 @@ public class CategoryService implements ICategoryService {
     }
 
     @Override
-    public CategoryResponse addProductToCategory(Long categoryId, Long productId) {
-        log.info("Add product to a category with id {} and request {}", categoryId, productId);
-        rabbitMQProducer.sendMessage("Add product to category with id [" + categoryId + "] with request [" + productId + "]" + " invoked by user: " + headerValidationService.user);
+    public void deleteCategory(Long categoryId) {
+        log.info("Delete category with id: {}", categoryId);
+        rabbitMQProducer.sendMessage("Delete category with id [" + categoryId + "]" + " invoked by user: " + headerValidationService.user);
+
+        // Fetch the category by ID
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException("Category not found"));
 
+        if (category.getProducts().isEmpty()) {
+            // If there are no products associated with this category, we can safely delete it
+            categoryRepository.deleteById(categoryId);
+        } else {
+            // If there are products associated, we need to dissociate them first
+            for (Product product : new ArrayList<>(category.getProducts())) { // Use a copy of the list to avoid ConcurrentModificationException
+                Product cp = productRepository.findById(product.getId())
+                        .orElseThrow(() -> new NotFoundException("Product not found"));
+
+                // Set the category of the product to null (dissociating the product from the category)
+                cp.setCategory(null);
+                productRepository.save(cp); // Save the product after disassociation
+
+                // Remove the product from the category's product list
+                category.getProducts().remove(product);
+            }
+
+            // After dissociating all products, now delete the category
+            categoryRepository.deleteById(categoryId);
+        }
+    }
+
+    @Override
+    public CategoryResponse addProductToCategory(Long categoryId, Long productId) {
+        log.info("Add product to a category with id {} and request {}", categoryId, productId);
+
+        // Send a RabbitMQ message for auditing
+        rabbitMQProducer.sendMessage("Add product to category with id [" + categoryId + "] with request [" + productId + "]" +
+                " invoked by user: " + headerValidationService.user);
+
+        // Fetch the category by ID
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("Category not found"));
+
+        // Fetch the product by ID
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("Product not found"));
 
+        // Check if the product already belongs to a category
+        if (product.getCategory() != null) {
+            if (product.getCategory().getId().equals(categoryId)) {
+                throw new IllegalStateException("Product is already assigned to this category.");
+            } else {
+                throw new IllegalStateException("Product is already assigned to another category (ID: " +
+                        product.getCategory().getId() + ").");
+            }
+        }
+
+        // Assign the product to the category
         product.setCategory(category);
+
+        // Add the product to the category's product list
         category.getProducts().add(product);
 
+        // Save the updated product and category
         productRepository.save(product);
-        return mapToCategoryResponse(categoryRepository.save(category));
+        Category updatedCategory = categoryRepository.save(category);
+
+        // Map the updated category to a response object
+        return mapToCategoryResponse(updatedCategory);
     }
 
     @Override

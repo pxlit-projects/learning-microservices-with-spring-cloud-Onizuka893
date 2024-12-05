@@ -13,6 +13,8 @@ public interface ICategoryService {
 
     CategoryResponse updateCategory(Long categoryId,CategoryRequest catToUpdate);
 
+    void deleteCategory(Long categoryId);
+
     CategoryResponse addProductToCategory(Long categoryId, Long productId);
 
     CategoryResponse removeProductFromCategory(Long categoryId, Long productId);

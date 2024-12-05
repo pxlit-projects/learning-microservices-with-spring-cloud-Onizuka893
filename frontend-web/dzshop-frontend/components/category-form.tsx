@@ -1,33 +1,37 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Category } from "@/lib/category";
 
-export function CategoryForm({ category, onSubmit }) {
+interface CategoryFormProps {
+  category: Category | null; // Optional, used for editing
+  onSubmit: (data: Omit<Category, "id" | "products">) => void; // Function to handle form submission
+}
+
+export function CategoryForm({ category, onSubmit }: CategoryFormProps) {
   const [formData, setFormData] = useState({
     name: "",
-    description: "",
-  })
+  });
 
   useEffect(() => {
     if (category) {
-      setFormData(category)
+      setFormData(category);
     }
-  }, [category])
+  }, [category]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    onSubmit(formData)
-    setFormData({ name: "", description: "" })
-  }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+    setFormData({ name: "" });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -41,18 +45,7 @@ export function CategoryForm({ category, onSubmit }) {
           required
         />
       </div>
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          name="description"
-          value={formData.description}
-          onChange={handleChange}
-          required
-        />
-      </div>
       <Button type="submit">{category ? "Update" : "Add"} Category</Button>
     </form>
-  )
+  );
 }
-

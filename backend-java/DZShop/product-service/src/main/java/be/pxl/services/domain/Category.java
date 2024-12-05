@@ -21,6 +21,6 @@ public class Category {
     private Long id;
     private String name;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY)
     private List<Product> products = new ArrayList<>();
 }

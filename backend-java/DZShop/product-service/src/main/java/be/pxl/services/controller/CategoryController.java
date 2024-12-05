@@ -47,6 +47,18 @@ public class CategoryController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity deleteCategory(@RequestHeader(value = "Authorization", required = false) String authorizationHeader ,@PathVariable Long id) {
+        boolean isAdmin = headerValidationService.hasAdminRole(authorizationHeader);
+        if (isAdmin) {
+            log.info("Delete category endpoint called with categoryId {}", id);
+            categoryService.deleteCategory(id);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
+        }
+    }
+
     @PostMapping("/{categoryId}/products/{productId}")
     public ResponseEntity addProductToCategory(
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader ,

@@ -12,4 +12,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
         public ResponseEntity<String> handleNotFoundException(NotFoundException ex) {
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         }
+
+        @ExceptionHandler(IllegalStateException.class)
+        public ResponseEntity<String> handleIllegalStateException(IllegalStateException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+        }
+
     }
