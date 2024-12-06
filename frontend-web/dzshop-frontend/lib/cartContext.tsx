@@ -9,7 +9,6 @@ import React, {
 import { Cart } from "./cart";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
-import { useUserContext } from "./userContext";
 
 // Define the CartContext types
 interface CartContextType {

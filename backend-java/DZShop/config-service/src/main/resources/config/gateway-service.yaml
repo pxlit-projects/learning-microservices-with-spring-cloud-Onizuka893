@@ -37,7 +37,6 @@ spring:
           predicates:
             - Path=/logbook/**
           filters:
-            - AddResponseHeader=Access-Control-Allow-Origin, *
             - RewritePath=/logbook/(?<path>.*), /$\{path}
 
 eureka:

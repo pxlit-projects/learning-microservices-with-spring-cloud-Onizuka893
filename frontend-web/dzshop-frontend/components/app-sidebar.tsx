@@ -1,5 +1,5 @@
 "use client";
-import { Box, Package, Tag } from "lucide-react";
+import { Box, Logs, Package, Tag } from "lucide-react";
 
 import {
   Sidebar,
@@ -18,6 +18,7 @@ const menuItems = [
   { name: "Dashboard", href: "/admin", icon: Box },
   { name: "Products", href: "/admin/products", icon: Package },
   { name: "Categories", href: "/admin/categories", icon: Tag },
+  { name: "Logbook", href: "/admin/logbook", icon: Logs },
 ];
 
 export function AppSidebar() {
