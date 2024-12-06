@@ -1,12 +1,11 @@
 package be.pxl.services;
 
-import be.pxl.services.domain.EnergyRating;
-import be.pxl.services.domain.Product;
-import be.pxl.services.domain.ProductRequest;
-import be.pxl.services.domain.ProductResponse;
+import be.pxl.services.domain.*;
 import be.pxl.services.repository.ProductRepository;
+import be.pxl.services.services.CategoryService;
 import be.pxl.services.services.HeaderValidationService;
 import be.pxl.services.services.ProductService;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -26,6 +26,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,6 +47,8 @@ public class ProductIntegrationTests {
     private ProductService productService;
     @MockBean
     private HeaderValidationService headerValidationService;
+    @Autowired
+    private CategoryService categoryService;
 
     @AfterEach
     public void cleanUpDatabase() {
@@ -110,6 +113,68 @@ public class ProductIntegrationTests {
 
     @Test
     @Transactional
+    public void testSearchProduct() throws Exception {
+        // Arrange: Prepare the product request
+        ProductRequest productRequest = ProductRequest.builder()
+                .name("Iphone 16")
+                .energyRating(EnergyRating.A_PLUS_PLUS.toString())
+                .price(1282.99)
+                .stock(10)
+                .description("Apple iphone 16")
+                .build();
+        ProductResponse response = productService.addProduct(productRequest);
+        CategoryRequest categoryRequest = CategoryRequest.builder()
+                .name("Apple")
+                .build();
+        CategoryResponse categoryResponse = categoryService.addCategory(categoryRequest);
+        Long categoryId = categoryResponse.getId();
+        Long productId = response.getId();
+
+        categoryService.addProductToCategory(categoryId, productId);
+
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/search"+"?category=Apple")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())  // Assert the HTTP status is Created
+                .andReturn();
+
+        List<Product> products = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<Product>>(){});
+
+        assertEquals(products.get(0).getName(), productRepository.findById(productId).get().getName());
+    }
+
+    @Test
+    @Transactional
+    public void testUpdateProduct() throws Exception {
+        // Arrange: Prepare the product request
+        ProductRequest productRequest = ProductRequest.builder()
+                .name("Iphone 16")
+                .energyRating(EnergyRating.A_PLUS_PLUS.toString())
+                .price(1282.99)
+                .stock(10)
+                .description("Apple iphone 16")
+                .build();
+        ProductResponse response = productService.addProduct(productRequest);
+        Long productId = response.getId();
+
+        productRequest.setStock(5);
+        String productRequestAsJson = objectMapper.writeValueAsString(productRequest);
+
+        // Mock header validation to simulate an admin role
+        when(headerValidationService.hasAdminRole(getAdminCredentials())).thenReturn(true);
+
+        // Act: Perform the HTTP request to create a product
+        mockMvc.perform(MockMvcRequestBuilders.put("/"+productId)
+                        .header(HttpHeaders.AUTHORIZATION, getAdminCredentials()) // Correct header
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(productRequestAsJson))
+                .andExpect(status().isOk())  // Assert the HTTP status is Created
+                .andReturn();
+
+        assertEquals(productRequest.getStock(), productRepository.findById(productId).get().getStock());
+    }
+
+    @Test
+    @Transactional
     public void testCreateProductForbidden() throws Exception {
         ProductRequest productRequest = ProductRequest.builder()
                 .name("Iphone 16")
@@ -153,6 +218,52 @@ public class ProductIntegrationTests {
         // For example, you can check if the cart contains the product now, or the product status is updated.
         Product product = productRepository.findById(productId).get();
         assertEquals(9, product.getStock());
+    }
+
+    @Test
+    @Transactional
+    public void testDeleteProduct() throws Exception {
+        ProductRequest productRequest = ProductRequest.builder()
+                .name("Iphone 16")
+                .energyRating(EnergyRating.A_PLUS_PLUS.toString())
+                .price(1282.99)
+                .stock(10)
+                .description("Apple iphone 16")
+                .build();
+        ProductResponse response = productService.addProduct(productRequest);
+        Long productId = response.getId();
+
+        when(headerValidationService.hasAdminRole(getAdminCredentials())).thenReturn(true);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/{id}", productId)
+                        .header(HttpHeaders.AUTHORIZATION, getAdminCredentials())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+
+        assertEquals(true, productRepository.findById(productId).isEmpty());
+    }
+
+    @Test
+    @Transactional
+    public void testDeleteProductForbidden() throws Exception {
+        ProductRequest productRequest = ProductRequest.builder()
+                .name("Iphone 16")
+                .energyRating(EnergyRating.A_PLUS_PLUS.toString())
+                .price(1282.99)
+                .stock(10)
+                .description("Apple iphone 16")
+                .build();
+        ProductResponse response = productService.addProduct(productRequest);
+        Long productId = response.getId();
+
+        when(headerValidationService.hasAdminRole(getUserCredentials())).thenReturn(false);
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/{id}", productId)
+                        .header(HttpHeaders.AUTHORIZATION, getUserCredentials())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+
+        assertEquals(false, productRepository.findById(productId).isEmpty());
     }
 
     @Test
