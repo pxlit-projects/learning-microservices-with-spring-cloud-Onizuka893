@@ -9,6 +9,7 @@ import React, {
 import axios from "axios";
 import { Product } from "./product";
 import { fromString } from "./energy-rating";
+import { useToast } from "@/hooks/use-toast";
 
 const username = "admin";
 const password = "admin";
@@ -47,9 +48,30 @@ interface ProductProviderProps {
 export const ProductProvider: React.FC<ProductProviderProps> = ({
   children,
 }) => {
+  const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
 
   const API_URL = "http://localhost:8083/product"; // Adjust to your API base URL
+
+  const handleError = (error: unknown, message: string) => {
+    if (axios.isAxiosError(error)) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.response?.data || "An error occurred.",
+      });
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: message,
+      });
+    }
+  };
+
+  const handleSucces = (message: string) => {
+    toast({ description: message });
+  };
 
   // Fetch all products
   const getProducts = async () => {
@@ -57,7 +79,7 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({
       const response = await axios.get<Product[]>(API_URL + "/");
       setProducts(response.data);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      handleError(error, "error fetching products");
     }
   };
 
@@ -75,9 +97,9 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({
       // Add query parameters only if they are not undefined
       if (searchTerm) params.append("searchTerm", searchTerm);
       if (category && category !== "all") params.append("category", category);
-      if (minPrice !== "0" && minPrice !== undefined)
+      if (minPrice !== "0" && minPrice !== "" && minPrice !== undefined)
         params.append("minPrice", minPrice.toString());
-      if (maxPrice !== "0" && maxPrice !== undefined)
+      if (maxPrice !== "0" && maxPrice !== "" && maxPrice !== undefined)
         params.append("maxPrice", maxPrice.toString());
       if (energyRating != "all")
         params.append("rating", fromString(energyRating!));
@@ -90,7 +112,7 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({
       // Update state with the fetched products
       setProducts(response.data);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      handleError(error, "error fetching products");
     }
   };
 
@@ -101,8 +123,9 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({
         headers: { Authorization: basicAuth },
       });
       setProducts((prev) => [...prev, response.data]);
+      handleSucces(`${product.name} created!`);
     } catch (error) {
-      console.error("Error creating product:", error);
+      handleError(error, "error creating products");
     }
   };
 
@@ -120,8 +143,9 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({
       setProducts((prev) =>
         prev.map((product) => (product.id === id ? response.data : product))
       );
+      handleSucces(`${updatedProduct.name} updated!`);
     } catch (error) {
-      console.error("Error updating product:", error);
+      handleError(error, "error updating products");
     }
   };
 
@@ -132,8 +156,9 @@ export const ProductProvider: React.FC<ProductProviderProps> = ({
         headers: { Authorization: basicAuth },
       });
       setProducts((prev) => prev.filter((product) => product.id !== id));
+      handleSucces(`product deleted!`);
     } catch (error) {
-      console.error("Error deleting product:", error);
+      handleError(error, "error deleting products");
     }
   };
 

@@ -1,5 +1,6 @@
 package be.pxl.services.domain;
 
+import be.pxl.services.exceptions.StockEmptyException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,7 +28,7 @@ public class Product {
     private Category category;
 
     public void removeFromStock() {
-        if (this.stock <= 0) throw new RuntimeException("Stock is empty");
+        if (this.stock <= 0) throw new StockEmptyException("Stock is empty");
 
         this.stock--;
     }

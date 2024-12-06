@@ -2,6 +2,7 @@ package be.pxl.services.services;
 
 import be.pxl.services.client.ProductClient;
 import be.pxl.services.exceptions.NotFoundException;
+import be.pxl.services.exceptions.ProductClientException;
 import be.pxl.services.model.Cart;
 import be.pxl.services.model.CartItem;
 import be.pxl.services.model.Product;
@@ -9,10 +10,13 @@ import be.pxl.services.model.dto.CartItemResponse;
 import be.pxl.services.model.dto.CartResponse;
 import be.pxl.services.repository.CartItemRepository;
 import be.pxl.services.repository.CartRepository;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -29,6 +33,7 @@ public class CartService implements ICartService {
     private CartItemResponse mapToCartItemResponse(CartItem cartItem) {
         return CartItemResponse.builder()
                 .productId(cartItem.getProductId())
+                .productName(cartItem.getProductName())
                 .quantity(cartItem.getQuantity())
                 .price(cartItem.getPrice())
                 .build();
@@ -81,7 +86,13 @@ public class CartService implements ICartService {
         log.info("Adding product to cart belonging to userId [{}] with product id [{}]", userId, productId);
         rabbitMQProducer.sendMessage("Adding product to cart belonging to userId " + userId + " with product id " +  productId + " invoked by user: " + headerValidationService.user);
         Cart cart = getCartByUserIdHelper(userId);
-        Product productFromProductService = productClient.addProductToCart(productId);
+        Product productFromProductService;
+
+        try {
+            productFromProductService = productClient.addProductToCart(productId);
+        } catch (FeignException e) {
+            throw new ProductClientException(e.getMessage().split(":")[2]);
+        }
 
         List<CartItem> cartItems = cartItemRepository.findAll().stream()
                 .filter(cartItem -> cartItem.getCart().equals(cart)).toList();
@@ -93,6 +104,7 @@ public class CartService implements ICartService {
             CartItem cartItem = CartItem.builder()
                     .quantity(1)
                     .productId(productFromProductService.getId())
+                    .productName(productFromProductService.getName())
                     .price(productFromProductService.getPrice())
                     .cart(cart)
                     .build();
@@ -113,7 +125,12 @@ public class CartService implements ICartService {
         log.info("Removing product from cart belonging to userId [{}] with product id [{}]", userId, productId);
         rabbitMQProducer.sendMessage("Removing product from cart belonging to userId " + userId + " with product id " +  productId + " invoked by user: " + headerValidationService.user);
         Cart cart = getCartByUserIdHelper(userId);
-        productClient.removeProductFromCart(productId);
+
+        try {
+            productClient.removeProductFromCart(productId);
+        } catch (FeignException e) {
+            throw new ProductClientException(e.getMessage().split(":")[2]);
+        }
 
         List<CartItem> cartItems = cartItemRepository.findAll().stream()
                 .filter(cartItem -> cartItem.getCart().equals(cart)).toList();
@@ -137,4 +154,6 @@ public class CartService implements ICartService {
         }
 
     }
+
+
 }

@@ -12,12 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CartItemResponse {
     private Long productId;
+    private String productName;
     private Integer quantity;
     private Double price;
-
-    public CartItemResponse(CartItem cartItem) {
-        this.productId = cartItem.getProductId();
-        this.quantity = cartItem.getQuantity();
-        this.price = cartItem.getPrice();
-    }
 }

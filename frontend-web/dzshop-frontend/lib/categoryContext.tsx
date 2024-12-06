@@ -77,6 +77,10 @@ export const CategoryProvider: React.FC<CategoryProviderProps> = ({
     }
   };
 
+  const handleSucces = (message: string) => {
+    toast({ description: message });
+  };
+
   // Fetch all products
   const getCategories = async () => {
     try {
@@ -96,6 +100,7 @@ export const CategoryProvider: React.FC<CategoryProviderProps> = ({
         headers: { Authorization: basicAuth },
       });
       setCategories((prev) => [...prev, response.data]);
+      handleSucces("Category created!");
     } catch (error) {
       handleError(error, "Error creating category");
     }
@@ -115,6 +120,7 @@ export const CategoryProvider: React.FC<CategoryProviderProps> = ({
       setCategories((prev) =>
         prev.map((product) => (product.id === id ? response.data : product))
       );
+      handleSucces("Category updated!");
     } catch (error) {
       handleError(error, "Error updating category");
     }
@@ -127,6 +133,7 @@ export const CategoryProvider: React.FC<CategoryProviderProps> = ({
         headers: { Authorization: basicAuth },
       });
       setCategories((prev) => prev.filter((product) => product.id !== id));
+      handleSucces("Category deleted!");
     } catch (error) {
       handleError(error, "Error deleting category");
     }
@@ -150,6 +157,7 @@ export const CategoryProvider: React.FC<CategoryProviderProps> = ({
           category.id === categoryId ? response.data : category
         )
       );
+      handleSucces("Product added to category!");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         // Check if the error response is a conflict (HTTP status 409)
@@ -184,6 +192,7 @@ export const CategoryProvider: React.FC<CategoryProviderProps> = ({
           category.id === categoryId ? response.data : category
         )
       );
+      handleSucces("Product removed from category!");
     } catch (error) {
       handleError(error, "Error removing product from category");
     }

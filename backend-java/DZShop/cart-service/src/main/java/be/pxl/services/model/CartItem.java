@@ -20,6 +20,7 @@ public class CartItem {
     @ManyToOne(fetch = FetchType.LAZY)
     private Cart cart;
     private Long productId;
+    private String productName;
     private int quantity;
     private double price;
 

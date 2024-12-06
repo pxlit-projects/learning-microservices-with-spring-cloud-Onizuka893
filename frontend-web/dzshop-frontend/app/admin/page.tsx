@@ -1,9 +1,16 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
 
 export default function AdminDashboard() {
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+      <div className="flex justify-center items-center h-[100px]">
+        <Button>
+          <Link href={"/shop"}>Go To Shop</Link>
+        </Button>
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
@@ -31,6 +38,5 @@ export default function AdminDashboard() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
-

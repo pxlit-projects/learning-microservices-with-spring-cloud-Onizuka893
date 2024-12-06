@@ -18,4 +18,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
             return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
         }
 
+        @ExceptionHandler(StockEmptyException.class)
+        public ResponseEntity<String> handleStockEmptyException(StockEmptyException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+        }
+
     }

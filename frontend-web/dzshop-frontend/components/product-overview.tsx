@@ -15,6 +15,8 @@ import { Product } from "@/lib/product";
 import { useProductContext } from "@/lib/productContext";
 import { toString } from "@/lib/energy-rating";
 import { useCategoryContext } from "@/lib/categoryContext";
+import { useCart } from "@/lib/cartContext";
+import { useUserContext } from "@/lib/userContext";
 
 export default function ProductOverview() {
   const { products, searchProducts } = useProductContext();
@@ -64,12 +66,12 @@ export default function ProductOverview() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Product Overview</h1>
+      <h1 className="text-2xl font-bold mb-6">Producten</h1>
 
       <div className="mb-6">
         <Input
           type="text"
-          placeholder="Search products..."
+          placeholder="Zoek producten..."
           value={searchTerm}
           onChange={(e) => handleTermChange(e.target.value)}
           className="w-full"
@@ -78,7 +80,7 @@ export default function ProductOverview() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div>
-          <Label htmlFor="minPrice">Min Price</Label>
+          <Label htmlFor="minPrice">Min Prijs</Label>
           <Input
             type="number"
             id="minPrice"
@@ -88,7 +90,7 @@ export default function ProductOverview() {
           />
         </div>
         <div>
-          <Label htmlFor="maxPrice">Max Price</Label>
+          <Label htmlFor="maxPrice">Max Prijs</Label>
           <Input
             type="number"
             id="maxPrice"
@@ -98,7 +100,7 @@ export default function ProductOverview() {
           />
         </div>
         <div>
-          <Label htmlFor="energyRating">Energy Rating</Label>
+          <Label htmlFor="energyRating">Energy Label</Label>
           <Select value={energyRating} onValueChange={handleEnergyRatingChange}>
             <SelectTrigger id="energyRating">
               <SelectValue placeholder="Select energy rating" />
@@ -147,6 +149,8 @@ interface ProductCardProps {
 }
 
 function ProductCard({ product }: ProductCardProps) {
+  const { addItem } = useCart();
+  const { username } = useUserContext();
   return (
     <div className="border rounded-lg p-4 shadow-sm">
       <h2 className="text-lg font-semibold mb-2">{product.name}</h2>
@@ -155,12 +159,14 @@ function ProductCard({ product }: ProductCardProps) {
       <p className="text-gray-600 mb-2">
         Energy Rating: {toString(product.energyRating)}
       </p>
-      <Button
-        onClick={() => alert(`Added ${product.name} to cart`)}
-        className="w-full mt-2"
-      >
-        Add to Cart
-      </Button>
+      {username && (
+        <Button
+          onClick={() => addItem(1234, product.id)}
+          className="w-full mt-2"
+        >
+          Add to Cart
+        </Button>
+      )}
     </div>
   );
 }

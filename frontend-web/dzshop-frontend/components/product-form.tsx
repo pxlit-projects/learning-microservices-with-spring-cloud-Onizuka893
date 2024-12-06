@@ -54,7 +54,6 @@ export function ProductForm({ product, onSubmit }: ProductFormProps) {
       price: parseFloat(formData.price),
       stock: parseInt(formData.stock, 10),
     });
-    alert("Product saved you can close the window");
     setFormData({
       name: "",
       description: "",
